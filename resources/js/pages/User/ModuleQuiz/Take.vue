@@ -77,6 +77,7 @@ onMounted(() => {
     
     // Start timer if time limit exists
     if (props.quiz.time_limit_minutes && timeLeft.value !== null) {
+         timeLeft.value = Math.floor(timeLeft.value) // ADD THIS LINE
         startTimer()
     }
 })
@@ -100,6 +101,7 @@ const startTimer = () => {
 
 const formatTimeLeft = computed(() => {
     if (timeLeft.value === null) return null
+    const totalSeconds = Math.floor(timeLeft.value) // Ensure integer
     const minutes = Math.floor(timeLeft.value / 60)
     const seconds = timeLeft.value % 60
     return `${minutes}:${seconds.toString().padStart(2, '0')}`

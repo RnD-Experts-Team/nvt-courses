@@ -194,29 +194,131 @@
                         </div>
 
                         <!-- Duration -->
-                        <div class="space-y-2">
-                            <Label for="duration">Duration (seconds)</Label>
-                            <div class="flex gap-2">
-                                <Input
-                                    id="duration"
-                                    v-model="form.duration"
-                                    type="number"
-                                    min="1"
-                                    max="86400"
-                                    placeholder="e.g., 3600 for 1 hour"
-                                    :class="{ 'border-destructive': form.errors.duration }"
-                                />
-                                <div class="flex items-center px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground min-w-0">
-                                    {{ formatDuration(form.duration) }}
-                                </div>
-                            </div>
-                            <div v-if="form.errors.duration" class="text-sm text-destructive">
-                                {{ form.errors.duration }}
-                            </div>
-                            <div class="text-sm text-muted-foreground">
-                                {{ form.storage_type === 'local' ? 'Optional - will be auto-detected from video file' : 'Video duration in seconds (optional)' }}
-                            </div>
-                        </div>
+                 <!-- Duration -->
+<div class="space-y-3">
+    <Label>Duration</Label>
+    
+    <!-- Duration Input Grid -->
+    <div class="grid grid-cols-3 gap-3">
+        <!-- Hours -->
+        <div class="space-y-2">
+            <Label for="hours" class="text-xs text-muted-foreground">Hours</Label>
+            <Input
+                id="hours"
+                type="number"
+                min="0"
+                max="99"
+                :value="durationHours"
+                @input="handleDurationChange('hours', ($event.target as HTMLInputElement).value)"
+                placeholder="0"
+                class="text-center"
+            />
+        </div>
+        
+        <!-- Minutes -->
+        <div class="space-y-2">
+            <Label for="minutes" class="text-xs text-muted-foreground">Minutes</Label>
+            <Input
+                id="minutes"
+                type="number"
+                min="0"
+                max="59"
+                :value="durationMinutes"
+                @input="handleDurationChange('minutes', ($event.target as HTMLInputElement).value)"
+                placeholder="0"
+                class="text-center"
+            />
+        </div>
+        
+        <!-- Seconds -->
+        <div class="space-y-2">
+            <Label for="seconds" class="text-xs text-muted-foreground">Seconds</Label>
+            <Input
+                id="seconds"
+                type="number"
+                min="0"
+                max="59"
+                :value="durationSeconds"
+                @input="handleDurationChange('seconds', ($event.target as HTMLInputElement).value)"
+                placeholder="0"
+                class="text-center"
+            />
+        </div>
+    </div>
+    
+    <!-- Duration Display -->
+    <div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+        <div class="flex items-center gap-2">
+            <Clock class="h-4 w-4 text-muted-foreground" />
+            <span class="text-sm font-medium">Total Duration:</span>
+            <span class="text-sm text-muted-foreground">{{ readableDuration }}</span>
+        </div>
+        <Button
+            v-if="durationHours > 0 || durationMinutes > 0 || durationSeconds > 0"
+            @click="clearDuration"
+            variant="ghost"
+            size="sm"
+            type="button"
+        >
+            <X class="h-4 w-4" />
+        </Button>
+    </div>
+    
+    <!-- Quick Presets -->
+    <div class="space-y-2">
+        <Label class="text-xs text-muted-foreground">Quick Presets:</Label>
+        <div class="flex flex-wrap gap-2">
+            <Button
+                @click="setDurationPreset(0, 5, 0)"
+                variant="outline"
+                size="sm"
+                type="button"
+            >
+                5 min
+            </Button>
+            <Button
+                @click="setDurationPreset(0, 10, 0)"
+                variant="outline"
+                size="sm"
+                type="button"
+            >
+                10 min
+            </Button>
+            <Button
+                @click="setDurationPreset(0, 30, 0)"
+                variant="outline"
+                size="sm"
+                type="button"
+            >
+                30 min
+            </Button>
+            <Button
+                @click="setDurationPreset(1, 0, 0)"
+                variant="outline"
+                size="sm"
+                type="button"
+            >
+                1 hour
+            </Button>
+            <Button
+                @click="setDurationPreset(2, 0, 0)"
+                variant="outline"
+                size="sm"
+                type="button"
+            >
+                2 hours
+            </Button>
+        </div>
+    </div>
+    
+    <div v-if="form.errors.duration" class="text-sm text-destructive">
+        {{ form.errors.duration }}
+    </div>
+    <div class="text-sm text-muted-foreground">
+        {{ form.storage_type === 'local' ? 'Optional - will be auto-detected from video file' : 'Video duration (optional)' }}
+    </div>
+</div>
+
                     </CardContent>
                 </Card>
 
@@ -290,6 +392,8 @@ import {
     Loader2,
     Cloud,
     HardDrive,
+    Clock,  // ✅ ADD THIS
+    X,      // ✅ ADD THIS
 } from 'lucide-vue-next'
 
 interface VideoCategory {
@@ -320,6 +424,9 @@ const form = useForm({
 
 const isSubmitting = ref(false)
 const testingUrl = ref(false)
+const durationHours = ref<number>(0)
+const durationMinutes = ref<number>(0)
+const durationSeconds = ref<number>(0)
 
 // Computed
 const maxFileSizeMB = computed(() => Math.round((props.maxFileSize || 512000) / 1024))
@@ -369,6 +476,49 @@ const testVideoUrl = async () => {
     } finally {
         testingUrl.value = false
     }
+}
+// computed property for readable duration
+const readableDuration = computed(() => {
+    const parts = []
+    if (durationHours.value > 0) parts.push(`${durationHours.value}h`)
+    if (durationMinutes.value > 0) parts.push(`${durationMinutes.value}m`)
+    if (durationSeconds.value > 0) parts.push(`${durationSeconds.value}s`)
+    return parts.length > 0 ? parts.join(' ') : 'Not set'
+})
+const updateFormDuration = () => {
+    const totalSeconds = (durationHours.value * 3600) + (durationMinutes.value * 60) + durationSeconds.value
+    form.duration = totalSeconds > 0 ? totalSeconds : null
+}
+
+const handleDurationChange = (type: 'hours' | 'minutes' | 'seconds', value: string) => {
+    let numValue = parseInt(value) || 0
+    
+    if (type === 'hours') {
+        numValue = Math.max(0, Math.min(99, numValue))
+        durationHours.value = numValue
+    } else if (type === 'minutes') {
+        numValue = Math.max(0, Math.min(59, numValue))
+        durationMinutes.value = numValue
+    } else if (type === 'seconds') {
+        numValue = Math.max(0, Math.min(59, numValue))
+        durationSeconds.value = numValue
+    }
+    
+    updateFormDuration()
+}
+
+const setDurationPreset = (hours: number, minutes: number, seconds: number) => {
+    durationHours.value = hours
+    durationMinutes.value = minutes
+    durationSeconds.value = seconds
+    updateFormDuration()
+}
+
+const clearDuration = () => {
+    durationHours.value = 0
+    durationMinutes.value = 0
+    durationSeconds.value = 0
+    updateFormDuration()
 }
 
 // Format duration helper

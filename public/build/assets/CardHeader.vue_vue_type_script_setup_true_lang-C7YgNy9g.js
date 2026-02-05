@@ -1,1 +1,0 @@
-import{b as o}from"./Button.vue_vue_type_script_setup_true_lang-LMFXRg97.js";import{d as r,a as n,o as l,n as t,u as c,K as p}from"./app-BaK19sRV.js";const i=r({__name:"CardHeader",props:{class:{}},setup(s){const e=s;return(a,m)=>(l(),n("div",{class:t(c(o)("flex flex-col gap-y-1.5 p-6",e.class))},[p(a.$slots,"default")],2))}});export{i as _};
