@@ -22,7 +22,9 @@ class CourseOnlineAssignment extends Model
         'progress_percentage',
         'current_module_id',
         'notification_sent',
-        'deadline', 'is_overdue', 'deadline_notification_sent_at'  // NEW
+        'deadline',
+        'is_overdue',
+        'deadline_notification_sent_at'  // NEW
     ];
 
     protected $casts = [

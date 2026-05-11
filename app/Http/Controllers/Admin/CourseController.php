@@ -267,7 +267,7 @@ class CourseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // ✅ Changed from 2048 to 10240 (10MB)
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // ✅ Changed from 2048 to 10240 (10MB)
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'required|in:pending,in_progress,completed',
