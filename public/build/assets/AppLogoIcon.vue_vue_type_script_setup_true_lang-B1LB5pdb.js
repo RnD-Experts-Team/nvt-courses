@@ -1,1 +1,0 @@
-import{d as o,a,o as e,L as t}from"./app-DSi8EPAB.js";const n=o({inheritAttrs:!1,__name:"AppLogoIcon",props:{className:{}},setup(r){return(s,l)=>(e(),a("img",t({src:"/logo.svg",class:s.className},s.$attrs,{alt:"Logo",class:"h-auto w-auto object-full"}),null,16))}});export{n as _};

@@ -712,6 +712,7 @@ Route::prefix('podcasts')->name('podcasts.')->group(function () {
         Route::get('/export/attendance', [ReportController::class, 'exportAttendance'])->name('export.attendance');
         Route::get('/export/course-completion', [ReportController::class, 'exportCourseCompletion'])->name('export.course-completion');
         Route::get('/quiz-attempts/export', [ReportController::class, 'exportQuizAttempts'])->name('export.quiz-attempts');
+        Route::get('/quiz-detailed/export', [\App\Http\Controllers\Admin\QuizExportController::class, 'exportDetailed'])->name('export.quiz-detailed');
 
         // Organizational reports
         Route::get('/organizational', [OrganizationalController::class, 'reports'])->name('organizational');

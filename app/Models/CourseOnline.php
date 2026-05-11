@@ -20,7 +20,9 @@ class CourseOnline extends Model
         'difficulty_level',
         'is_active',
         'created_by',
-        'deadline', 'has_deadline', 'deadline_type'  // NEW
+        'deadline',
+        'has_deadline', 
+        'deadline_type'  // NEW
     ];
 
     protected $casts = [

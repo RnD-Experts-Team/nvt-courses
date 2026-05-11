@@ -72,6 +72,11 @@ const filters = ref({
     date_to: props.filters?.date_to || '',
 })
 
+const exportOptions = ref({
+    format: 'csv',
+    include_users_without_attempts: false,
+})
+
 // Handle select changes
 const handleQuizChange = (value: string) => {
     filters.value.quiz_id = value === 'all' ? '' : value
@@ -111,9 +116,31 @@ const resetFilters = () => {
 }
 
 // Export to CSV
-const exportToCsv = () => {
-    const queryParams = new URLSearchParams(filters.value).toString()
-    window.location.href = route('admin.reports.export.quiz-attempts') + '?' + queryParams
+const exportDetailedReport = () => {
+    const params: Record<string, string> = {
+        quiz_id: filters.value.quiz_id,
+        department_id: filters.value.department_id,
+        date_from: filters.value.date_from,
+        date_to: filters.value.date_to,
+        format: exportOptions.value.format,
+        include_users_without_attempts: exportOptions.value.include_users_without_attempts ? '1' : '0',
+    }
+
+    if (filters.value.status === 'passed' || filters.value.status === 'failed') {
+        params.passed = filters.value.status
+    } else {
+        params.passed = 'all'
+    }
+
+    if (filters.value.status === 'pending') {
+        params.attempt_status = 'pending'
+    }
+
+    const queryParams = new URLSearchParams(
+        Object.entries(params).filter(([, value]) => value !== ''),
+    ).toString()
+
+    window.location.href = route('admin.reports.export.quiz-detailed') + '?' + queryParams
 }
 
 // Format date for display
@@ -178,9 +205,9 @@ const getScoreColor = (percentage) => {
                     <h1 class="text-xl sm:text-2xl font-bold text-foreground">Quiz Attempts Report</h1>
                     <p class="text-sm text-muted-foreground mt-1">Comprehensive reporting interface for tracking quiz attempts, scores, and performance analytics</p>
                 </div>
-                <Button @click="exportToCsv" class="w-full sm:w-auto">
+                <Button @click="exportDetailedReport" class="w-full sm:w-auto">
                     <Download class="mr-2 h-4 w-4" />
-                    Export to CSV
+                    Export Detailed Report
                 </Button>
             </div>
 
@@ -267,6 +294,37 @@ const getScoreColor = (percentage) => {
                                 type="date"
                                 v-model="filters.date_to"
                             />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="space-y-2">
+                            <Label for="export_format">Export Format</Label>
+                            <Select
+                                :model-value="exportOptions.format"
+                                @update:model-value="(value) => exportOptions.format = value"
+                            >
+                                <SelectTrigger id="export_format">
+                                    <SelectValue placeholder="Select format" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="csv">CSV</SelectItem>
+                                    <SelectItem value="xlsx">XLSX</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="include_users_without_attempts">Coverage Mode</Label>
+                            <div class="flex items-center gap-2 h-10 border rounded-md px-3">
+                                <input
+                                    id="include_users_without_attempts"
+                                    type="checkbox"
+                                    v-model="exportOptions.include_users_without_attempts"
+                                    class="h-4 w-4"
+                                />
+                                <span class="text-sm text-muted-foreground">Include users without attempts</span>
+                            </div>
                         </div>
                     </div>
 

@@ -34,20 +34,6 @@ console.log('Is admin:', isUserAdmin.value);
 
     <DropdownMenuSeparator />
 
-    <DropdownMenuGroup>
-        <DropdownMenuItem>
-            <Link
-                class="flex items-center w-full text-left px-2 py-1.5"
-                :href="route('profile.edit')"
-            >
-                <Settings class="mr-2 h-4 w-4" />
-                Settings
-            </Link>
-        </DropdownMenuItem>
-    </DropdownMenuGroup>
-
-    <DropdownMenuSeparator />
-
     <DropdownMenuItem>
         <Link
             class="flex items-center w-full text-left px-2 py-1.5"
