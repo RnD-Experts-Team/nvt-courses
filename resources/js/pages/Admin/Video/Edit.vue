@@ -564,7 +564,7 @@ const isMigrating = ref(false)
 const migrationProgress = ref(0)
 
 // Computed
-const maxFileSizeMB = computed(() => Math.round((props.maxFileSize || 512000) / 1024))
+const maxFileSizeMB = computed(() => Math.round((props.maxFileSize || 10240000) / 1024))
 
 // Migration handlers
 const handleMigrationUpload = (data: any) => {
