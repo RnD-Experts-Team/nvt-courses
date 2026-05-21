@@ -114,7 +114,7 @@ class VideoController extends Controller
                 ['value' => 'google_drive', 'label' => 'Google Drive'],
                 ['value' => 'local', 'label' => 'Local Storage'],
             ],
-            'maxFileSize' => 512000, // 500 MB in KB
+            'maxFileSize' => 10240000, // 10,000 MB (10GB) in KB
             'allowedMimes' => ['mp4', 'webm', 'avi', 'mov', 'mkv'],
         ]);
     }
@@ -330,7 +330,7 @@ class VideoController extends Controller
                 'avg_completion' => 0,
             ],
             'categories' => $categories,
-            'maxFileSize' => 512000, // 500 MB in KB for ChunkUploader
+            'maxFileSize' => 10240000, // 10,000 MB (10GB) in KB for ChunkUploader
         ]);
     }
 

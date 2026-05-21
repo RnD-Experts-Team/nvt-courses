@@ -429,7 +429,7 @@ const durationMinutes = ref<number>(0)
 const durationSeconds = ref<number>(0)
 
 // Computed
-const maxFileSizeMB = computed(() => Math.round((props.maxFileSize || 512000) / 1024))
+const maxFileSizeMB = computed(() => Math.round((props.maxFileSize || 10240000) / 1024))
 
 // ✅ NEW: Handle chunk upload completion
 const handleUploadComplete = (data: any) => {
