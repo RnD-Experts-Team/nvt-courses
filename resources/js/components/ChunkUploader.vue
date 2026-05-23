@@ -60,12 +60,15 @@ onMounted(() => {
     // ✅ Store the final response here
     let finalResponse = null;
 
+    const chunkSizeBytes = 5 * 1024 * 1024;
+    console.log(`🔧 FilePond chunk size: ${chunkSizeBytes} bytes (${chunkSizeBytes / 1024 / 1024} MB)`);
+
     pond = FilePond.create(fileInput.value, {
         acceptedFileTypes: props.accept ? [props.accept] : ['video/*'],
         maxFileSize: props.maxFileSize,
         
         chunkUploads: true,
-        chunkSize: 1048576,
+        chunkSize: chunkSizeBytes,
         chunkForce: true,
         chunkRetryDelays: [500, 1000, 3000],
         

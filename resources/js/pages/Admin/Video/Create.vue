@@ -189,7 +189,7 @@
                                 {{ form.errors.video_file || form.errors.video_data }}
                             </div>
                             <div class="text-sm text-muted-foreground">
-                                Video will be uploaded in 2MB chunks for reliability. Maximum {{ maxFileSizeMB }}MB
+                                Video will be uploaded in 5MB chunks for reliability. Maximum {{ maxFileSizeMB }}MB
                             </div>
                         </div>
 
