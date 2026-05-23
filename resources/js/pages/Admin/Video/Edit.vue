@@ -172,7 +172,7 @@
                                 @progress="handleMigrationProgress"
                             />
                             <p class="text-sm text-muted-foreground">
-                                Video will be uploaded in 2MB chunks. Maximum file size: {{ maxFileSizeMB }}MB
+                                Video will be uploaded in 5MB chunks. Maximum file size: {{ maxFileSizeMB }}MB
                             </p>
                         </div>
 
