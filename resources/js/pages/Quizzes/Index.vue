@@ -74,16 +74,44 @@ const filteredQuizzes = computed(() => {
 const completedQuizzes = computed(() => {
     if (!props.quizzes.data || !props.quizzes.data.length) return 0
     return props.quizzes.data.filter(quiz =>
-        quiz.has_passed || quiz.attempts >= 3
+        quiz.has_passed || hasReachedMaxAttempts(quiz)
     ).length
 })
 
 const pendingQuizzes = computed(() => {
     if (!props.quizzes.data || !props.quizzes.data.length) return 0
     return props.quizzes.data.filter(quiz =>
-        !quiz.has_passed && quiz.attempts < 3
+        !quiz.has_passed && !hasReachedMaxAttempts(quiz)
     ).length
 })
+
+const hasReachedMaxAttempts = (quiz) => {
+    if (!quiz.max_attempts) {
+        return false
+    }
+
+    return quiz.attempts >= quiz.max_attempts
+}
+
+const getAttemptsLabel = (quiz) => {
+    if (!quiz.max_attempts) {
+        return `${quiz.attempts} attempts (unlimited)`
+    }
+
+    return `${quiz.attempts}/${quiz.max_attempts} attempts`
+}
+
+const getAttemptProgress = (quiz) => {
+    if (quiz.has_passed) {
+        return 100
+    }
+
+    if (!quiz.max_attempts) {
+        return 0
+    }
+
+    return Math.min((quiz.attempts / quiz.max_attempts) * 100, 100)
+}
 
 // EXISTING: Methods
 const toggleView = () => {
@@ -103,30 +131,30 @@ const canTakeQuiz = (quiz) => {
     if (quiz.has_deadline && !quiz.is_available) {
         return false
     }
-    return quiz.attempts < 3
+    return !hasReachedMaxAttempts(quiz)
 }
 
 const isQuizCompleted = (quiz) => {
-    return quiz.has_passed || quiz.attempts >= 3
+    return quiz.has_passed || hasReachedMaxAttempts(quiz)
 }
 
 const getQuizStatus = (quiz) => {
     if (quiz.has_passed) return 'Passed'
-    if (quiz.attempts >= 3) return 'Failed'
+    if (hasReachedMaxAttempts(quiz)) return 'Failed'
     if (quiz.attempts > 0) return 'In Progress'
     return 'Not Started'
 }
 
 const getQuizStatusColorClass = (quiz) => {
     if (quiz.has_passed) return 'bg-green-500'
-    if (quiz.attempts >= 3) return 'bg-red-500'
+    if (hasReachedMaxAttempts(quiz)) return 'bg-red-500'
     if (quiz.attempts > 0) return 'bg-yellow-500'
     return 'bg-blue-500'
 }
 
 const getQuizStatusVariant = (quiz) => {
     if (quiz.has_passed) return 'default'
-    if (quiz.attempts >= 3) return 'destructive'
+    if (hasReachedMaxAttempts(quiz)) return 'destructive'
     if (quiz.attempts > 0) return 'secondary'
     return 'outline'
 }
@@ -371,7 +399,7 @@ const getCourseTypeClass = (quiz) => {
                                     <div class="mb-4">
                                         <div class="flex justify-between items-center mb-2">
                                             <span class="text-xs text-muted-foreground">Progress</span>
-                                            <span class="text-xs text-foreground">{{ quiz.attempts }}/3 attempts</span>
+                                            <span class="text-xs text-foreground">{{ getAttemptsLabel(quiz) }}</span>
                                         </div>
                                         <div class="w-full bg-secondary rounded-full h-2">
                                             <div
@@ -379,7 +407,7 @@ const getCourseTypeClass = (quiz) => {
                                                     'h-2 rounded-full transition-all duration-300',
                                                     quiz.has_passed ? 'bg-green-500' : 'bg-gradient-to-r from-primary to-purple-600'
                                                 ]"
-                                                :style="{ width: quiz.has_passed ? '100%' : `${(quiz.attempts / 3) * 100}%` }"
+                                                :style="{ width: `${getAttemptProgress(quiz)}%` }"
                                             ></div>
                                         </div>
                                     </div>
