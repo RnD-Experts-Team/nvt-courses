@@ -1,0 +1,1 @@
+import{b as a}from"./Button.vue_vue_type_script_setup_true_lang-Btcm4-DG.js";import{d as r,a as n,o as l,n as t,u as c,K as m}from"./app-v9fgscEf.js";const u=r({__name:"DialogFooter",props:{class:{}},setup(s){const e=s;return(o,p)=>(l(),n("div",{class:t(c(a)("flex flex-col-reverse sm:flex-row sm:justify-end sm:gap-x-2",e.class))},[m(o.$slots,"default")],2))}});export{u as _};
