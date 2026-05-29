@@ -72,6 +72,9 @@ class QuizController extends Controller
                 'deadline' => $quiz->deadline?->format('Y-m-d H:i:s'),
                 'deadline_status' => $quiz->has_deadline ? $quiz->getDeadlineStatus() : null,
                 'time_limit_minutes' => $quiz->time_limit_minutes,
+                'max_attempts' => $quiz->max_attempts,
+                'retry_delay_hours' => $quiz->retry_delay_hours,
+                'show_correct_answers' => $quiz->show_correct_answers,
             ];
         });
 
@@ -128,6 +131,8 @@ class QuizController extends Controller
 
             // Attempt settings
             'max_attempts' => 'nullable|integer|min:1|max:100',
+            'retry_delay_hours' => 'nullable|integer|min:0|max:168',
+            'show_correct_answers' => 'required|in:never,after_pass,after_max_attempts,always',
 
             // Questions validation
             'questions' => 'required|array|min:1|max:20',
@@ -173,6 +178,8 @@ class QuizController extends Controller
 
                 // Attempt settings
                 'max_attempts' => $validated['max_attempts'] ?? null,
+                'retry_delay_hours' => $validated['retry_delay_hours'] ?? 0,
+                'show_correct_answers' => $validated['show_correct_answers'],
             ]);
 
             foreach ($validated['questions'] as $index => $questionData) {
@@ -343,6 +350,8 @@ class QuizController extends Controller
                 'time_limit_minutes' => $quiz->time_limit_minutes,
                 'allows_extensions' => $quiz->allows_extensions,
                 'max_attempts' => $quiz->max_attempts,
+                'retry_delay_hours' => $quiz->retry_delay_hours,
+                'show_correct_answers' => $quiz->show_correct_answers,
                 'questions' => $quiz->questions->map(function ($question) {
                     return [
                         'id' => $question->id,
@@ -388,6 +397,8 @@ class QuizController extends Controller
 
             // Attempt settings
             'max_attempts' => 'nullable|integer|min:1|max:100',
+            'retry_delay_hours' => 'nullable|integer|min:0|max:168',
+            'show_correct_answers' => 'required|in:never,after_pass,after_max_attempts,always',
 
             // Questions
             'questions' => 'required|array|min:1|max:20',
@@ -433,6 +444,8 @@ class QuizController extends Controller
 
                 // Attempt settings
                 'max_attempts' => $validated['max_attempts'] ?? null,
+                'retry_delay_hours' => $validated['retry_delay_hours'] ?? 0,
+                'show_correct_answers' => $validated['show_correct_answers'],
             ]);
 
             // Handle questions (existing logic)

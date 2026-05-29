@@ -107,7 +107,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-muted-foreground">Attempt</p>
-                                    <p class="text-xl font-bold text-foreground">{{ attempt.attempt_number || userAttempts.length }}/3</p>
+                                    <p class="text-xl font-bold text-foreground">{{ attempt.attempt_number || userAttempts.length }}/{{ attempt.quiz?.max_attempts ?? '∞' }}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -356,6 +356,10 @@ export default {
             type: Array,
             default: () => [],
         },
+        showCorrectAnswersAllowed: {
+            type: Boolean,
+            default: false,
+        },
     },
     setup(props) {
         const showAnswers = ref(false);
@@ -373,22 +377,25 @@ export default {
         });
 
         const attemptsLeft = computed(() => {
-            const maxAttempts = 3;
+            const maxAttempts = props.attempt.quiz?.max_attempts;
+            if (!maxAttempts) {
+                return 'Unlimited';
+            }
+
             return Math.max(0, maxAttempts - props.userAttempts.length);
         });
 
         const canRetry = computed(() => {
-            return !props.attempt.passed &&
-                attemptsLeft.value > 0 &&
-                (props.attempt.attempt_number || 0) < 3;
+            const maxAttempts = props.attempt.quiz?.max_attempts;
+
+            if (!maxAttempts) {
+                return !props.attempt.passed;
+            }
+
+            return !props.attempt.passed && props.userAttempts.length < maxAttempts;
         });
 
-        // Show correct answers if user passed OR reached maximum attempts (3)
-        const showCorrectAnswersAllowed = computed(() => {
-            // Show answers if user passed OR reached exactly 3 attempts
-            const hasReachedMaxAttempts = (props.attempt.attempt_number >= 3) || (props.userAttempts.length >= 3);
-            return props.attempt.passed || hasReachedMaxAttempts;
-        });
+        const showCorrectAnswersAllowed = computed(() => props.showCorrectAnswersAllowed);
 
         // Methods
         const formatDate = (dateString) => {

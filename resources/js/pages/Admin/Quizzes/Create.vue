@@ -236,6 +236,39 @@
                                 </p>
                                 <span v-if="form.errors.max_attempts" class="mt-1 text-xs text-destructive">{{ form.errors.max_attempts }}</span>
                             </div>
+
+                            <div>
+                                <Label for="retry_delay_hours">Retry Delay (hours)</Label>
+                                <Input
+                                    id="retry_delay_hours"
+                                    v-model.number="form.retry_delay_hours"
+                                    type="number"
+                                    min="0"
+                                    max="168"
+                                    :disabled="form.processing"
+                                />
+                                <p class="text-xs text-muted-foreground mt-1">0 = no delay between attempts.</p>
+                                <span v-if="form.errors.retry_delay_hours" class="mt-1 text-xs text-destructive">{{ form.errors.retry_delay_hours }}</span>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <Label for="show_correct_answers">Show Correct Answers</Label>
+                                <Select v-model="form.show_correct_answers" :disabled="form.processing">
+                                    <SelectTrigger id="show_correct_answers">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="option in showCorrectAnswersOptions"
+                                            :key="option.value"
+                                            :value="option.value"
+                                        >
+                                            {{ option.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <span v-if="form.errors.show_correct_answers" class="mt-1 text-xs text-destructive">{{ form.errors.show_correct_answers }}</span>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -548,6 +581,8 @@ export default {
 
             // Attempt settings
             max_attempts: null,
+            retry_delay_hours: 0,
+            show_correct_answers: 'after_pass',
 
             // Questions
             questions: [
@@ -570,6 +605,13 @@ export default {
         const breadcrumbs = [
             { name: 'Quizzes', route: 'admin.quizzes.index' },
             { name: 'Create', route: null },
+        ];
+
+        const showCorrectAnswersOptions = [
+            { value: 'never', label: 'Never show correct answers' },
+            { value: 'after_pass', label: 'Show after passing' },
+            { value: 'after_max_attempts', label: 'Show after all attempts used' },
+            { value: 'always', label: 'Always show correct answers' },
         ];
 
         // Computed property for selected course ID
@@ -699,6 +741,8 @@ export default {
 
                 // Attempt settings
                 max_attempts: form.max_attempts || null,
+                retry_delay_hours: form.retry_delay_hours ?? 0,
+                show_correct_answers: form.show_correct_answers,
 
                 // Questions
                 questions: form.questions.map((question) => ({
@@ -760,6 +804,7 @@ export default {
             resetQuestionOptions,
             updateCorrectAnswer,
             submitQuiz,
+            showCorrectAnswersOptions,
             showDiscardModal,
             confirmDiscard,
             discardChanges,

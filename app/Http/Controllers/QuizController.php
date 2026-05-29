@@ -87,6 +87,9 @@ class QuizController extends Controller
                 'is_available' => $quiz->isAvailableForTaking(),
                 'enforce_deadline' => $quiz->enforce_deadline,
                 'time_limit_minutes' => $quiz->time_limit_minutes,
+                'max_attempts' => $quiz->max_attempts,
+                'retry_delay_hours' => $quiz->retry_delay_hours,
+                'show_correct_answers' => $quiz->show_correct_answers,
             ];
         });
 
@@ -135,9 +138,10 @@ class QuizController extends Controller
                 ->with('info', 'You have already passed this quiz and cannot retake it.');
         }
 
-        // Check maximum attempts
-        if ($attemptCount >= 3) {
-            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of attempts.']);
+        // Enforce dynamic attempt policies (max attempts, retry delay, deadline)
+        $attemptPolicy = $quiz->canUserAttempt($user->id);
+        if (!$attemptPolicy['can_attempt']) {
+            return redirect()->back()->withErrors(['error' => $attemptPolicy['message']]);
         }
 
         $quiz->load(['course', 'courseOnline', 'questions']);
@@ -241,8 +245,10 @@ class QuizController extends Controller
                 ->with('info', 'You have already passed this quiz and cannot submit another attempt.');
         }
 
-        if ($attemptCount >= 3) {
-            return redirect()->back()->with('error', 'You have exceeded the maximum number of attempts (3).');
+        // Enforce dynamic attempt policies (max attempts, retry delay, deadline)
+        $attemptPolicy = $quiz->canUserAttempt($user->id);
+        if (!$attemptPolicy['can_attempt']) {
+            return redirect()->back()->withErrors(['error' => $attemptPolicy['message']]);
         }
 
         DB::beginTransaction();
@@ -357,6 +363,7 @@ class QuizController extends Controller
 
         // Get associated course
         $associatedCourse = $attempt->quiz->getAssociatedCourse();
+        $showCorrectAnswersAllowed = $attempt->quiz->shouldShowCorrectAnswers($attempt->user_id);
 
         return Inertia::render('Quizzes/Results', [
             'attempt' => [
@@ -380,10 +387,14 @@ class QuizController extends Controller
                     'has_deadline' => $attempt->quiz->has_deadline,
                     'deadline_formatted' => $attempt->quiz->getFormattedDeadline(),
                     'enforce_deadline' => $attempt->quiz->enforce_deadline,
+                    'max_attempts' => $attempt->quiz->max_attempts,
+                    'retry_delay_hours' => $attempt->quiz->retry_delay_hours,
+                    'show_correct_answers' => $attempt->quiz->show_correct_answers,
                 ],
                 'attempt_number' => $attempt->attempt_number,
                 'responses' => $responses,
             ],
+            'showCorrectAnswersAllowed' => $showCorrectAnswersAllowed,
             'userAttempts' => QuizAttempt::where('user_id', $attempt->user_id)
                 ->where('quiz_id', $attempt->quiz_id)
                 ->orderBy('created_at', 'desc')

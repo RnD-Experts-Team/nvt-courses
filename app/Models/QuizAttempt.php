@@ -71,13 +71,17 @@ class QuizAttempt extends Model
 
     public function isPassed()
     {
-        // Make sure quiz relationship is loaded
-        if (!$this->quiz || !$this->quiz->total_points) {
+        // Avoid implicit lazy loading when global lazy loading prevention is enabled.
+        $quiz = $this->relationLoaded('quiz')
+            ? $this->getRelation('quiz')
+            : $this->quiz()->first(['id', 'total_points', 'pass_threshold']);
+
+        if (!$quiz || !$quiz->total_points) {
             return false;
         }
 
         // Calculate passing threshold using quiz's pass_threshold (e.g., 80.00 means 80%)
-        $passingThreshold = ($this->quiz->pass_threshold / 100) * $this->quiz->total_points;
+        $passingThreshold = ($quiz->pass_threshold / 100) * $quiz->total_points;
 
         // Return true if total score meets or exceeds threshold
         return $this->total_score >= $passingThreshold;
